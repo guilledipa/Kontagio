@@ -31,5 +31,5 @@ func (p *Projectile) Update() {
 func (p *Projectile) Draw(screen *ebiten.Image) {
 	// Draw a small yellow circle for the projectile
 	vector.DrawFilledCircle(screen, float32(p.x), float32(p.y),
-		float32(3), color.RGBA{0, 255, 255, 255}, false)
+		float32(3), color.RGBA{255, 255, 0, 255}, false)
 }
