@@ -8,6 +8,12 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
+const (
+	SpawnDelay = 30 // Delay between enemy spawns in frames
+)
+
+// Enemy path: El camino deberia ser procedual, no estático, asi hay más
+// variedad cada vez que se juega.
 var path = []float64{
 	0, 240, // Start at left, middle of the screen
 	320, 240, // Move to the middle

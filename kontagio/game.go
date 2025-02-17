@@ -11,6 +11,7 @@ import (
 const (
 	ScreenWidth  = 640
 	ScreenHeight = 480
+	InitialLives = 50
 )
 
 type Game struct {
@@ -20,8 +21,11 @@ type Game struct {
 	Wave        int
 	Resource    int
 	GameOver    bool
+	Lives       int
 }
 
+// TODO: SpawnWave() espawnea los enemigos en la misma posición, deberían
+// espawnear en diferentes posiciones, pero amontonados.
 func (g *Game) SpawnWave() {
 	for i := 0; i < 5+g.Wave*2; i++ {
 		g.Enemies = append(g.Enemies, &Enemy{
@@ -38,14 +42,22 @@ func (g *Game) RemoveDeadEnemies() []*Enemy {
 	var alive []*Enemy
 	for _, enemy := range g.Enemies {
 		if enemy.health > 0 {
-			// If the enemy is still alive, add it to the "alive" slice
 			alive = append(alive, enemy)
 		} else {
-			// If the enemy is dead, reward the player with resources
-			g.Resource += 10 // Adjust the reward as needed
+			g.Resource += 10 // Recompensa, debería ser un valor variable.
 		}
 	}
 	return alive
+}
+
+func (g *Game) RemoveEnemy(enemy *Enemy) []*Enemy {
+	var remaining []*Enemy
+	for _, e := range g.Enemies {
+		if e != enemy {
+			remaining = append(remaining, e)
+		}
+	}
+	return remaining
 }
 
 func (g *Game) RemoveHitProjectiles() []*Projectile {
@@ -72,8 +84,15 @@ func (g *Game) Update() error {
 	// Update enemies
 	for _, enemy := range g.Enemies {
 		enemy.Update()
-		if enemy.x > ScreenWidth {
-			g.GameOver = true
+		// enemy.x+10 is the right edge of the enemy (tengo que mover esto a
+		// una variable)
+		if enemy.x+10 > ScreenWidth {
+			// Enemy reached the end of the path
+			g.Lives--
+			if g.Lives <= 0 {
+				g.GameOver = true
+			}
+			g.Enemies = g.RemoveEnemy(enemy)
 		}
 	}
 
@@ -127,6 +146,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// Draw UI
 	ebitenutil.DebugPrint(screen, "Wave: "+strconv.Itoa(g.Wave))
 	ebitenutil.DebugPrintAt(screen, "Resource: "+strconv.Itoa(g.Resource), 0, 20)
+	ebitenutil.DebugPrintAt(screen, "Lives: "+strconv.Itoa(g.Lives), 0, 40)
 
 	if g.GameOver {
 		ebitenutil.DebugPrintAt(screen, "Game Over!", ScreenWidth/2-40, ScreenHeight/2)
