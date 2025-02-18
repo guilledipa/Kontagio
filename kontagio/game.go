@@ -1,6 +1,7 @@
 package kontagio
 
 import (
+	"math/rand/v2"
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -12,6 +13,8 @@ const (
 	ScreenWidth  = 640
 	ScreenHeight = 480
 	InitialLives = 50
+	// Offset para separar a los enemigos que spawnean asi no se amontonan.
+	spawnOffset = 20
 )
 
 type Game struct {
@@ -24,16 +27,24 @@ type Game struct {
 	Lives       int
 }
 
-// TODO: SpawnWave() espawnea los enemigos en la misma posición, deberían
-// espawnear en diferentes posiciones, pero amontonados.
 func (g *Game) SpawnWave() {
 	for i := 0; i < 5+g.Wave*2; i++ {
+		offsetX := rand.Float64() * spawnOffset * 5
+		offsetY := rand.Float64() * spawnOffset * 5
+		// Calcular el path unico para este enemigo relativo a la posición de
+		// spawn.
+		uniquePath := make([]float64, len(mainPath))
+		for j := 0; j < len(mainPath); j += 2 {
+			uniquePath[j] = mainPath[j] + offsetX
+			uniquePath[j+1] = mainPath[j+1] + offsetY
+		}
 		g.Enemies = append(g.Enemies, &Enemy{
-			x:       0,
-			y:       240,
+			x:       uniquePath[0],
+			y:       uniquePath[1],
 			health:  5 + g.Wave,
 			speed:   1 + float64(g.Wave)*0.2,
 			pathIdx: 0,
+			path:    uniquePath,
 		})
 	}
 }
