@@ -9,28 +9,36 @@ import (
 )
 
 const (
-	towerCost = 50
+	towerCost       = 50
+	shootCooldown   = 15 // Cooldown time between shots (in ticks)
+	toweMinDistance = 35 // Minimum distance between turrets
 )
 
 type Tower struct {
 	x, y        float64
 	attackRange float64
+	cooldown    int // Cooldown time for shooting again
 }
 
 func (t *Tower) Update(g *Game) {
-	for _, enemy := range g.Enemies {
-		dx := enemy.x - t.x
-		dy := enemy.y - t.y
-		dist := math.Sqrt(dx*dx + dy*dy)
-		if dist <= t.attackRange {
-			// Shoot at the enemy
-			g.Projectiles = append(g.Projectiles, &Projectile{
-				x:      t.x,
-				y:      t.y,
-				target: enemy,
-				speed:  4,
-			})
-			break // Only shoot one enemy at a time
+	if t.cooldown > 0 {
+		t.cooldown--
+	} else {
+		for _, enemy := range g.Enemies {
+			dx := enemy.x - t.x
+			dy := enemy.y - t.y
+			dist := math.Sqrt(dx*dx + dy*dy)
+			if dist <= t.attackRange {
+				// Shoot at the enemy
+				g.Projectiles = append(g.Projectiles, &Projectile{
+					x:      t.x,
+					y:      t.y,
+					target: enemy,
+					speed:  4,
+				})
+				t.cooldown = shootCooldown
+				break // Only shoot one enemy at a time
+			}
 		}
 	}
 }

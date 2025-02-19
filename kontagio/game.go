@@ -1,6 +1,8 @@
 package kontagio
 
 import (
+	"log"
+	"math"
 	"math/rand/v2"
 	"strconv"
 
@@ -127,12 +129,27 @@ func (g *Game) Update() error {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		x, y := ebiten.CursorPosition()
 		if g.Resource >= towerCost {
-			g.Towers = append(g.Towers, &Tower{
-				x:           float64(x),
-				y:           float64(y),
-				attackRange: 100,
-			})
-			g.Resource -= towerCost
+			// Check if the new turret is too close to existing turrets
+			canPlace := true
+			for _, tower := range g.Towers {
+				dx := float64(x) - tower.x
+				dy := float64(y) - tower.y
+				dist := math.Sqrt(dx*dx + dy*dy)
+				if dist < toweMinDistance {
+					canPlace = false
+					break
+				}
+			}
+			if canPlace {
+				g.Towers = append(g.Towers, &Tower{
+					x:           float64(x),
+					y:           float64(y),
+					attackRange: 100,
+				})
+				g.Resource -= towerCost
+			} else {
+				log.Println("Cannot place turret: Too close to another turret")
+			}
 		}
 	}
 
