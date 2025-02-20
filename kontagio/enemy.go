@@ -9,18 +9,11 @@ import (
 )
 
 const (
-	SpawnDelay = 30 // Delay between enemy spawns in frames
+	// SpawnDelay es el tiempo en ticks entre la aparición de enemigos.
+	SpawnDelay = 30
 )
 
-// Enemy path: El camino deberia ser procedual, no estático, asi hay más
-// variedad cada vez que se juega.
-var mainPath = []float64{
-	0, 240, // Start at left, middle of the screen
-	320, 240, // Move to the middle
-	320, 120, // Move up
-	640, 120, // Move to the right
-}
-
+// Enemy representa a un enemigo en el juego.
 type Enemy struct {
 	x, y    float64
 	health  int
@@ -30,6 +23,7 @@ type Enemy struct {
 	path []float64
 }
 
+// Update actualiza la posición del enemigo en el juego.
 func (e *Enemy) Update() {
 	if e.pathIdx < len(e.path)-1 {
 		targetX := e.path[e.pathIdx]
@@ -48,6 +42,7 @@ func (e *Enemy) Update() {
 	}
 }
 
+// Draw dibuja al enemigo en la pantalla.
 func (e *Enemy) Draw(screen *ebiten.Image) {
 	vector.DrawFilledRect(screen,
 		float32(e.x-10), float32(e.y-10),

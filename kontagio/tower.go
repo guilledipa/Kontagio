@@ -14,12 +14,14 @@ const (
 	toweMinDistance = 35 // Minimum distance between turrets
 )
 
+// Tower representa una torre en el juego.
 type Tower struct {
 	x, y        float64
 	attackRange float64
 	cooldown    int // Cooldown time for shooting again
 }
 
+// Update actualiza los disparos de la torre en el juego.
 func (t *Tower) Update(g *Game) {
 	if t.cooldown > 0 {
 		t.cooldown--
@@ -43,6 +45,7 @@ func (t *Tower) Update(g *Game) {
 	}
 }
 
+// Draw dibuja la torre en la pantalla.
 func (t *Tower) Draw(screen *ebiten.Image) {
 	vector.DrawFilledRect(screen,
 		float32(t.x-15), float32(t.y-15),

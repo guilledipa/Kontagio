@@ -8,12 +8,14 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
+// Projectile representa un proyectil disparado por una torre.
 type Projectile struct {
 	x, y   float64
 	target *Enemy
 	speed  float64
 }
 
+// Update actualiza la posición del proyectil en el juego.
 func (p *Projectile) Update() {
 	// Move toward the target
 	dx := p.target.x - p.x
@@ -28,6 +30,7 @@ func (p *Projectile) Update() {
 	}
 }
 
+// Draw dibuja el proyectil en la pantalla.
 func (p *Projectile) Draw(screen *ebiten.Image) {
 	// Draw a small yellow circle for the projectile
 	vector.DrawFilledCircle(screen, float32(p.x), float32(p.y),

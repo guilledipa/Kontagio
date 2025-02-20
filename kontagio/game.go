@@ -13,17 +13,23 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
+// Constantes del juego que definen el tamaño de la pantalla y valores de
+// configuración iniciales para el juego.
 const (
-	ScreenWidth  = 640
-	ScreenHeight = 480
-	InitialLives = 50
+	ScreenWidth      = 640
+	ScreenHeight     = 480
+	InitialLives     = 50
+	InitialResources = 100
+	SceneMenu        = "menu"
+	ScenePlaying     = "playing"
+	SceneGameOver    = "gameover"
+)
+
+const (
 	// Offset para separar a los enemigos que spawnean asi no se amontonan.
 	spawnOffset      = 20
 	minNumberOfTurns = 2
 	maxNumberOfTurns = 4
-	SceneMenu        = "menu"
-	ScenePlaying     = "playing"
-	SceneGameOver    = "gameover"
 	gameOverDelay    = 3 * time.Second // Delay before returning to menu after game over
 )
 
@@ -49,6 +55,7 @@ func generateProceduralPath() []float64 {
 	return path
 }
 
+// Game representa el estado del juego.
 type Game struct {
 	Towers       []*Tower
 	Enemies      []*Enemy
@@ -62,6 +69,8 @@ type Game struct {
 	gameOverTime time.Time // Time when game over occurred
 }
 
+// SpawnWave spawnea una nueva oleada de enemigos en el juego.
+// TODO: Los parametros de esta funcion deberian ser configurables.
 func (g *Game) SpawnWave() {
 	for i := 0; i < 5+g.Wave*2; i++ {
 		offsetX := rand.Float64() * spawnOffset * 5
@@ -84,18 +93,21 @@ func (g *Game) SpawnWave() {
 	}
 }
 
+// RemoveDeadEnemies remueve a los enemigos muertos del juego.
+// TODO: Los parametros de esta funcion deberian ser configurables.
 func (g *Game) RemoveDeadEnemies() []*Enemy {
 	var alive []*Enemy
 	for _, enemy := range g.Enemies {
 		if enemy.health > 0 {
 			alive = append(alive, enemy)
 		} else {
-			g.Resource += 10 // Recompensa, debería ser un valor variable.
+			g.Resource += 10
 		}
 	}
 	return alive
 }
 
+// RemoveEnemy remueve a un enemigo del juego.
 func (g *Game) RemoveEnemy(enemy *Enemy) []*Enemy {
 	var remaining []*Enemy
 	for _, e := range g.Enemies {
@@ -106,6 +118,7 @@ func (g *Game) RemoveEnemy(enemy *Enemy) []*Enemy {
 	return remaining
 }
 
+// RemoveHitProjectiles remueve los proyectiles que han impactado a su objetivo.
 func (g *Game) RemoveHitProjectiles() []*Projectile {
 	var active []*Projectile
 	for _, projectile := range g.Projectiles {
@@ -116,6 +129,7 @@ func (g *Game) RemoveHitProjectiles() []*Projectile {
 	return active
 }
 
+// Update actualiza el estado del juego.
 func (g *Game) Update() error {
 	switch g.Scene {
 	case SceneMenu:
@@ -128,6 +142,7 @@ func (g *Game) Update() error {
 	return nil
 }
 
+// updateMenu actualiza el menu del juego.
 func (g *Game) updateMenu() error {
 	// Handle menu selection
 	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
@@ -141,6 +156,8 @@ func (g *Game) updateMenu() error {
 	return nil
 }
 
+// updatePlaying actualiza el juego en curso. Esta funcion se encarga de
+// actualizar las torres, enemigos, proyectiles...
 func (g *Game) updatePlaying() error {
 	if g.GameOver {
 		g.Scene = SceneGameOver
@@ -208,6 +225,7 @@ func (g *Game) updatePlaying() error {
 	return nil
 }
 
+// updateGameOver actualiza el estado del juego cuando se ha terminado.
 func (g *Game) updateGameOver() error {
 	// Return to menu after delay
 	if time.Since(g.gameOverTime) > gameOverDelay {
@@ -216,6 +234,7 @@ func (g *Game) updateGameOver() error {
 	return nil
 }
 
+// resetGame reinicia el juego a su estado inicial.
 func (g *Game) resetGame() {
 	// Reset game state
 	g.Towers = []*Tower{}
@@ -228,6 +247,7 @@ func (g *Game) resetGame() {
 	g.Path = generateProceduralPath()
 }
 
+// Draw dibuja el estado actual del juego en la pantalla.
 func (g *Game) Draw(screen *ebiten.Image) {
 	switch g.Scene {
 	case SceneMenu:
@@ -239,6 +259,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 }
 
+// drawMenu dibuja el menu del juego en la pantalla.
 func (g *Game) drawMenu(screen *ebiten.Image) {
 	screen.Fill(color.Black)
 	// Draw menu title
@@ -248,6 +269,7 @@ func (g *Game) drawMenu(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(screen, "Quit", ScreenWidth/2-20, ScreenHeight/2+30)
 }
 
+// drawPlaying dibuja el juego en curso en la pantalla.
 func (g *Game) drawPlaying(screen *ebiten.Image) {
 	// Draw towers
 	for _, tower := range g.Towers {
@@ -267,10 +289,12 @@ func (g *Game) drawPlaying(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(screen, "Lives: "+strconv.Itoa(g.Lives), 0, 40)
 }
 
+// drawGameOver dibuja la pantalla de game over en la pantalla.
 func (g *Game) drawGameOver(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(screen, "Game Over!", ScreenWidth/2-40, ScreenHeight/2)
 }
 
+// Layout determina el tamaño de la pantalla del juego.
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return ScreenWidth, ScreenHeight
 }
