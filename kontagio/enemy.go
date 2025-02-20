@@ -8,11 +8,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
-const (
-	// SpawnDelay es el tiempo en ticks entre la aparición de enemigos.
-	SpawnDelay = 30
-)
-
 // Enemy representa a un enemigo en el juego.
 type Enemy struct {
 	x, y    float64
