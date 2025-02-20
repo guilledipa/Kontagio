@@ -15,6 +15,7 @@ func main() {
 		Wave:        0,
 		Resource:    100,
 		Lives:       kontagio.InitialLives,
+		Scene:       kontagio.SceneMenu,
 	}
 	ebiten.SetWindowSize(kontagio.ScreenWidth, kontagio.ScreenHeight)
 	ebiten.SetWindowTitle("Tower Defense")
